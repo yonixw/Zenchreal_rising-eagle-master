@@ -1,11 +1,11 @@
-PRMasterServer
+rising-eagle-master
 ==============
 
-A GameSpy replacement Master Server for [Project Reality: BF2](http://www.realitymod.com). This emulates the GameSpy API in order to keep PR:BF2 playable after the Battlefield 2 GameSpy shutdown.
+Reimplementation for the GameSpy master server used by the game Rising Eagle. Forked from the BF2: Project Reality master server.
 
 Features
 ---------------------
-Supports **Battlefield 2**'s GameSpy implementation. No other games are supported (yet?). If you wish to modify the code and add support for your game, or add any additional features, please feel free to make a **fork** and submit a [pull request](https://help.github.com/articles/using-pull-requests).
+Supports **Rising Eagle**'s GameSpy implementation. No other games are supported (yet?). If you wish to modify the code and add support for your game, or add any additional features, please feel free to make a **fork** and submit a [pull request](https://help.github.com/articles/using-pull-requests).
 
 - Login Server (Uses SQLite for the database)
     - Creating Accounts

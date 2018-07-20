@@ -24,7 +24,8 @@ namespace PRMasterServer.Data
 		private static EventHandler _closeHandler;
 
 		private SQLiteCommand _getUsersByName;
-		private SQLiteCommand _getUsersByEmail;
+        private SQLiteCommand _getUsersByEmailReal;
+        private SQLiteCommand _getUsersByEmail;
 		private SQLiteCommand _updateUser;
 		private SQLiteCommand _createUser;
 		private SQLiteCommand _countUsers;
@@ -42,7 +43,10 @@ namespace PRMasterServer.Data
 			// we need to safely dispose of the database when the application closes
 			// this is a console app, so we need to hook into the console ctrl signal
 			_closeHandler += CloseHandler;
-			SetConsoleCtrlHandler(_closeHandler, true);
+			//SetConsoleCtrlHandler(_closeHandler, true);
+			Console.CancelKeyPress += delegate {
+				CloseHandler(CtrlType.CTRL_C_EVENT);
+			};
 
 			Log = log;
 			LogError = logError;
@@ -106,7 +110,10 @@ namespace PRMasterServer.Data
 			_getUsersByName = new SQLiteCommand("SELECT id, password, email, country, session FROM users WHERE name=@name COLLATE NOCASE", _db);
 			_getUsersByName.Parameters.Add("@name", DbType.String);
 
-			_getUsersByEmail = new SQLiteCommand("SELECT id, name, country, session FROM users WHERE email=@email AND password=@password", _db);
+            _getUsersByEmailReal = new SQLiteCommand("SELECT id, name, password, email, country, session FROM users WHERE email=@email COLLATE NOCASE", _db);
+            _getUsersByEmailReal.Parameters.Add("@email", DbType.String);
+
+            _getUsersByEmail = new SQLiteCommand("SELECT id, name, country, session FROM users WHERE email=@email AND password=@password", _db);
 			_getUsersByEmail.Parameters.Add("@email", DbType.String);
 			_getUsersByEmail.Parameters.Add("@password", DbType.String);
 
@@ -168,7 +175,11 @@ namespace PRMasterServer.Data
 						_getUsersByName.Dispose();
 						_getUsersByName = null;
 					}
-					if (_getUsersByEmail != null) {
+                    if (_getUsersByEmailReal != null) {
+                        _getUsersByEmailReal.Dispose();
+                        _getUsersByEmailReal = null;
+                    }
+                    if (_getUsersByEmail != null) {
 						_getUsersByEmail.Dispose();
 						_getUsersByEmail = null;
 					}
@@ -263,7 +274,42 @@ namespace PRMasterServer.Data
 			return null;
 		}
 
-		public List<Dictionary<string, object>> GetData(string email, string passwordEncrypted)
+        public List<Dictionary<string, object>> GetUserByEmail(string email)
+        {
+            if (_db == null)
+                return null;
+
+            lock (_dbLock)
+            {
+                _getUsersByEmailReal.Parameters["@email"].Value = email;
+
+                using (SQLiteDataReader reader = _getUsersByEmailReal.ExecuteReader())
+                {
+                    List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+                    while (reader.Read())
+                    {
+                        // only go once
+
+                        Dictionary<string, object> data = new Dictionary<string, object>();
+                        data.Add("id", reader["id"]);
+                        data.Add("name", reader["name"]);
+                        data.Add("passwordenc", reader["password"]);
+                        data.Add("email", reader["email"]);
+                        data.Add("country", reader["country"]);
+                        data.Add("userid", (Int64)reader["id"] + UserIdOffset);
+                        data.Add("profileid", (Int64)reader["id"] + ProfileIdOffset);
+                        data.Add("session", reader["session"]);
+
+                        result.Add(data);
+                    }
+                    return result;
+                }
+            }
+
+            //return null;
+        }
+
+        public List<Dictionary<string, object>> GetData(string email, string passwordEncrypted)
 		{
 			if (_db == null)
 				return null;
@@ -401,8 +447,8 @@ namespace PRMasterServer.Data
 			return existing;
 		}
 
-		[DllImport("Kernel32")]
-		private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
+		//[DllImport("Kernel32")]
+		//private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
 
 		private enum CtrlType
 		{

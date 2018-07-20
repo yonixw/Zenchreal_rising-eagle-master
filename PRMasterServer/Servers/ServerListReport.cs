@@ -231,7 +231,8 @@ namespace PRMasterServer.Servers
 					Array.Copy(receivedBytes, 5, clientResponse, 0, clientResponse.Length);
 
 					// if we validate, reply back a good response
-					if (clientResponse.SequenceEqual(validate)) {
+					//if (clientResponse.SequenceEqual(validate)) {
+                    if (true) { 
 						byte[] response = new byte[] { 0xfe, 0xfd, 0x0a, uniqueId[0], uniqueId[1], uniqueId[2], uniqueId[3] };
 						_socket.SendTo(response, remote);
 
@@ -244,7 +245,10 @@ namespace PRMasterServer.Servers
 					Array.Copy(receivedBytes, 1, uniqueId, 0, 4);
 
 					RefreshServerPing(remote);
-				}
+				} else
+                {
+                    //Console.WriteLine(BitConverter.ToString(receivedBytes).Replace("-", ""));
+                }
 			} catch (Exception ex) {
 				LogError(Category, ex.ToString());
 			}
@@ -292,8 +296,21 @@ namespace PRMasterServer.Servers
 				IPAddress = remote.Address.ToString(),
 				QueryPort = remote.Port,
 				LastRefreshed = DateTime.UtcNow,
-				LastPing = DateTime.UtcNow
-			};
+				LastPing = DateTime.UtcNow,
+                ready = 0,
+                server_type = 0,
+                balance_sides = 0,
+                voip = 0,
+                teamplay = 0,
+                skill_restriction_above = -1,
+                skill_restriction_below = -1,
+                version = "",
+                roaming_levels = "",
+                server_message = "",
+                friendly_fire = 0,
+                fraglimit = 0,
+                autoreload = 0
+            };
 
 			// set the country based off ip address
 			if (GeoIP.Instance == null || GeoIP.Instance.Reader == null) {
@@ -307,13 +324,16 @@ namespace PRMasterServer.Servers
 				}
 			}
 
-			for (int i = 0; i < serverVarsSplit.Length - 1; i += 2) {
+            for (int i = 0; i < serverVarsSplit.Length - 1; i += 2) {
 				PropertyInfo property = server.GetType().GetProperty(serverVarsSplit[i]);
 
-				if (property == null)
-					continue;
+                if (property == null)
+                {
+                    LogError(Category, String.Format("Unknown server property '{0}'", serverVarsSplit[i]));
+                    continue;
+                }
 
-				if (property.Name == "hostname") {
+                if (property.Name == "hostname") {
 					// strip consecutive whitespace from hostname
 					property.SetValue(server, Regex.Replace(serverVarsSplit[i + 1], @"\s+", " ").Trim(), null);
 				} else if (property.Name == "bf2_plasma") {
@@ -352,18 +372,16 @@ namespace PRMasterServer.Servers
 				}
 			}
 
-			if (String.IsNullOrWhiteSpace(server.gamename) || !server.gamename.Equals("battlefield2", StringComparison.InvariantCultureIgnoreCase)) {
+			if (String.IsNullOrWhiteSpace(server.gamename) || !server.gamename.Equals("risingeaglepc", StringComparison.InvariantCultureIgnoreCase)) {
 				// only allow servers with a gamename of battlefield2
 				return true; // true means we don't send back a response
-			} else if (String.IsNullOrWhiteSpace(server.gamevariant) || !ModWhitelist.ToList().Any(x => SQLMethods.EvaluateIsLike(server.gamevariant, x))) {
+			} /*else if (String.IsNullOrWhiteSpace(server.gamevariant) || !ModWhitelist.ToList().Any(x => SQLMethods.EvaluateIsLike(server.gamevariant, x))) {
 				// only allow servers with a gamevariant of those listed in modwhitelist.txt, or (pr || pr_*) by default
 				return true; // true means we don't send back a response
-			}
+			}*/
 
 			// you've got to have all these properties in order for your server to be valid
 			if (!String.IsNullOrWhiteSpace(server.hostname) &&
-				!String.IsNullOrWhiteSpace(server.gamevariant) &&
-				!String.IsNullOrWhiteSpace(server.gamever) &&
 				!String.IsNullOrWhiteSpace(server.gametype) &&
 				!String.IsNullOrWhiteSpace(server.mapname) &&
 				server.hostport > 1024 && server.hostport <= UInt16.MaxValue &&

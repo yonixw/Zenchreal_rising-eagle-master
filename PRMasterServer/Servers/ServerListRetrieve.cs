@@ -224,7 +224,7 @@ namespace PRMasterServer.Servers
 					string[] messages = receivedData.Split(new string[] { "\x00\x00\x00\x00" }, StringSplitOptions.RemoveEmptyEntries);
 
 					for (int i = 0; i < messages.Length; i++) {
-						if (messages[i].StartsWith("battlefield2")) {
+						if (messages[i].StartsWith("risingeaglepc")) {
 							if (ParseRequest(state, messages[i]))
 								return;
 						}
@@ -316,9 +316,9 @@ namespace PRMasterServer.Servers
 		{
 			string[] data = message.Split(new char[] { '\x00' }, StringSplitOptions.RemoveEmptyEntries);
 			if (data.Length != 4 ||
-				!data[0].Equals("battlefield2", StringComparison.InvariantCultureIgnoreCase) ||
+				!data[0].Equals("risingeaglepc", StringComparison.InvariantCultureIgnoreCase) ||
 				(
-					!data[1].Equals("battlefield2", StringComparison.InvariantCultureIgnoreCase) &&
+					!data[1].Equals("risingeaglepc", StringComparison.InvariantCultureIgnoreCase) &&
 					!data[1].Equals("gslive", StringComparison.InvariantCultureIgnoreCase)
 				)
 			) {
@@ -351,6 +351,8 @@ namespace PRMasterServer.Servers
 				key = DataFunctions.StringToBytes("hW6m9a");
 			else if (gamename == "arma2oapc")
 				key = DataFunctions.StringToBytes("sGKWik");
+            else if (gamename == "risingeaglepc")
+                key = DataFunctions.StringToBytes("9cy8vc");
 			else
 				key = DataFunctions.StringToBytes("Xn221z");
 			
@@ -374,10 +376,10 @@ namespace PRMasterServer.Servers
 			data.Add(fieldsCount);
 			data.Add(0);
 
-			foreach (var field in fields) {
+            foreach (var field in fields) {
 				data.AddRange(DataFunctions.StringToBytes(field));
 				data.AddRange(new byte[] { 0, 0 });
-			}
+            }
 
 			foreach (var server in servers) {
 				// commented this stuff out since it caused some issues on testing, might come back to it later and see what's happening...
@@ -413,8 +415,17 @@ namespace PRMasterServer.Servers
 
 				data.Add(255);
 
-				for (int i = 0; i < fields.Length; i++) {
-					data.AddRange(DataFunctions.StringToBytes(GetField(server, fields[i])));
+                for (int i = 0; i < fields.Length; i++) {
+                    
+                    if (server.GetType().GetProperty(fields[i]) == null)
+                    {
+                        Console.WriteLine(String.Format("Unknown server property '{0}' requested in server list", fields[i]));
+                        data.AddRange(DataFunctions.StringToBytes(""));
+                    }
+                    else
+                    {
+                        data.AddRange(DataFunctions.StringToBytes(GetField(server, fields[i])));
+                    }
 
 					if (i < fields.Length - 1)
 						data.AddRange(new byte[] { 0, 255 });

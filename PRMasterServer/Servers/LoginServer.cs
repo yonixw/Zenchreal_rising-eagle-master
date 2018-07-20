@@ -95,7 +95,7 @@ namespace PRMasterServer.Servers
 
 				_clientManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, true);
 				_clientManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
-				_clientManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, false);
+				//_clientManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, false);
 				_clientManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 				
 				_clientManagerSocket.Bind(new IPEndPoint(info.Address, info.Port));
@@ -136,7 +136,7 @@ namespace PRMasterServer.Servers
 
 				_searchManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, true);
 				_searchManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
-				_searchManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, false);
+				//_searchManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, false);
 				_searchManagerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
 				_searchManagerSocket.Bind(new IPEndPoint(info.Address, info.Port));
@@ -377,12 +377,12 @@ namespace PRMasterServer.Servers
 
 			Log(Category, String.Format("[{0}] Received {1} query from: {2}:{3}", state.Type, query, ((IPEndPoint)state.Socket.RemoteEndPoint).Address, ((IPEndPoint)state.Socket.RemoteEndPoint).Port));
 
-			if (keyValues.ContainsKey("gamename") && !keyValues["gamename"].Equals("battlefield2", StringComparison.InvariantCultureIgnoreCase)) {
+			if (keyValues.ContainsKey("gamename") && !keyValues["gamename"].Equals("risingeaglepc", StringComparison.InvariantCultureIgnoreCase)) {
 				// say no to those not using bf2... Begone evil demon, bf2 for life!
 				return;
 			}
 
-			switch (state.Type) {
+            switch (state.Type) {
 				case LoginSocketState.SocketType.Client:
 					HandleClientManager(ref state, query, keyValues);
 					break;
@@ -390,7 +390,7 @@ namespace PRMasterServer.Servers
 					HandleSearchManager(ref state, query, keyValues);
 					break;
 			}
-		}
+        }
 		
 		private void HandleClientManager(ref LoginSocketState state, string query, Dictionary<string, string> keyValues)
 		{
@@ -416,8 +416,10 @@ namespace PRMasterServer.Servers
 					LoginServerMessages.Logout(ref state, keyValues);
 				} else if (query.Equals("getprofile", StringComparison.InvariantCultureIgnoreCase)) {
 					SendToClient(ref state, LoginServerMessages.SendProfile(ref state, keyValues, true));
-				}
-			} else if (state.State >= 4) {
+				} else if (query.Equals("updatepro", StringComparison.InvariantCultureIgnoreCase)) {
+                    LoginServerMessages.UpdateProfile(ref state, keyValues);
+                }
+            } else if (state.State >= 4) {
 				state.Dispose();
 			}
 		}
@@ -425,12 +427,27 @@ namespace PRMasterServer.Servers
 		private void HandleSearchManager(ref LoginSocketState state, string query, Dictionary<string, string> keyValues)
 		{
 			if (state.State == 0) {
-				if (query.Equals("nicks", StringComparison.InvariantCultureIgnoreCase)) {
-					SendToClient(ref state, LoginServerMessages.SendNicks(ref state, keyValues));
-				} else if (query.Equals("check", StringComparison.InvariantCultureIgnoreCase)) {
-					SendToClient(ref state, LoginServerMessages.SendCheck(ref state, keyValues));
-				} 
-			} else if (state.State == 1) {
+                if (query.Equals("nicks", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    SendToClient(ref state, LoginServerMessages.SendNicks(ref state, keyValues));
+                }
+                else if (query.Equals("check", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    SendToClient(ref state, LoginServerMessages.SendCheck(ref state, keyValues));
+                }
+                else if (query.Equals("search", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    SendToClient(ref state, LoginServerMessages.SendSearch(ref state, keyValues));
+                } 
+                else if (query.Equals("newuser", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    SendToClient(ref state, LoginServerMessages.NewUser(ref state, keyValues));
+                }
+                else
+                {
+                    Log(Category, String.Format("[{0}] Unhandled query type: {1}", state.Type, query));
+                }
+            } else if (state.State == 1) {
 				state.State++;
 			} else if (state.State >= 2) {
 				state.Dispose();

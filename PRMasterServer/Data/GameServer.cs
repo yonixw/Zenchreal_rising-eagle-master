@@ -30,10 +30,19 @@ namespace PRMasterServer.Data
 		[NonFilter]
 		public string localip1 { get; set; }
 
-		[NonFilter]
+        [NonFilter]
+        public string localip2 { get; set; }
+
+        [NonFilter]
+        public string localip3 { get; set; }
+
+        [NonFilter]
 		public int localport { get; set; }
 
-		[NonFilter]
+        [NonFilter]
+        public string public_address { get; set; }
+
+        [NonFilter]
 		public bool natneg { get; set; }
 
 		[NonFilter]
@@ -85,5 +94,20 @@ namespace PRMasterServer.Data
 		public int bf2_coopbotcount { get; set; }
 		public int bf2_coopbotdiff { get; set; }
 		public bool bf2_novehicles { get; set; }
-	}
+
+        public int ready { get; set; }
+        public int server_type { get; set; }
+        public int balance_sides { get; set; }
+        public int voip { get; set; }
+        public int teamplay { get; set; }
+        public int skill_restriction_above { get; set; }
+        public int skill_restriction_below { get; set; }
+        public string version { get; set; }
+        public string roaming_levels { get; set; }
+        public string server_message { get; set; }
+        public int friendly_fire { get; set; }
+        public int fraglimit { get; set; }
+        public int autoreload { get; set; }
+
+    }
 }

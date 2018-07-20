@@ -153,8 +153,8 @@ namespace PRMasterServer.Servers
 				return DataFunctions.StringToBytes(@"\error\\err\0\fatal\\errmsg\Invalid Query!\id\1\final\");
 			}
 
-			if (keyValues.ContainsKey("passwordenc")) {
-				state.PasswordEncrypted = keyValues["passwordenc"];
+			if (keyValues.ContainsKey("passenc")) {
+				state.PasswordEncrypted = keyValues["passenc"];
 			} else {
 				return DataFunctions.StringToBytes(@"\error\\err\0\fatal\\errmsg\Invalid Query!\id\1\final\");
 			}
@@ -172,10 +172,12 @@ namespace PRMasterServer.Servers
 					return DataFunctions.StringToBytes(@"\error\\err\0\fatal\\errmsg\Error creating account!\id\1\final\");
 				}
 
-				message = String.Format(@"\nur\\userid\{0}\profileid\{1}\id\1\final\", clientData["userid"], clientData["profileid"]);
-			}
+                //message = String.Format(@"\nur\\userid\{0}\profileid\{1}\id\1\final\", clientData["userid"], clientData["profileid"]);
+                message = String.Format(@"\nur\0\pid\{0}\final\", clientData["profileid"]);
+            }
 
-			return DataFunctions.StringToBytes(message);
+            Console.WriteLine(message); // TODO remove
+            return DataFunctions.StringToBytes(message);
 		}
 
 		public static byte[] SendKeepAlive()
@@ -261,7 +263,58 @@ namespace PRMasterServer.Servers
 			return DataFunctions.StringToBytes(message);
 		}
 
-		private static string GenerateProofValue(LoginSocketState state)
+        internal static byte[] SendSearch(ref LoginSocketState state, Dictionary<string, string> keyValues)
+        {
+            string message = "";
+
+            if (keyValues.ContainsKey("uniquenick"))
+            {
+                Console.WriteLine("Search for uniquenick: {0}", keyValues["uniquenick"]);
+                message = GenerateSearchResultsNick(LoginDatabase.Instance.GetData(keyValues["uniquenick"]));
+            }
+            else if (keyValues.ContainsKey("email"))
+            {
+                Console.WriteLine("Search for email: {0}", keyValues["email"]);
+                List<Dictionary<string, object>> matchedUsers;
+                matchedUsers = LoginDatabase.Instance.GetUserByEmail(keyValues["email"]);
+                message = GenerateSearchResultsEmail(matchedUsers);
+            }
+            else
+            {
+                return DataFunctions.StringToBytes(@"\error\\err\0\fatal\\errmsg\Invalid Query!\id\1\final\");
+            }
+
+            return DataFunctions.StringToBytes(message);
+        }
+
+        private static string GenerateSearchResultsNick(Dictionary<string, object> user)
+        {
+            string message = "";
+            if (user != null)
+            {
+                message += String.Format(@"\bsr\nick\{0}\uniquenick\{0}\namespaceid\2", user["name"]);
+            }
+            message += @"\bsrdone\final\";
+            Console.WriteLine(message); // TODO remove
+            return message;
+        }
+
+        private static string GenerateSearchResultsEmail(List<Dictionary<string, object>> users)
+        {
+            string message = "";
+            if (users != null)
+            {
+                foreach (Dictionary<string, object> user in users)
+                {
+                    message += String.Format(@"\bsr\email\{0}\namespaceid\2", user["email"]);
+                }
+            }
+            message += @"\bsrdone\final\";
+            Console.WriteLine(message); // TODO remove
+            return message;
+        }
+
+        private static string GenerateProofValue(LoginSocketState state)
 		{
 			string value = state.PasswordEncrypted;
 			value += new String(' ', 48);
