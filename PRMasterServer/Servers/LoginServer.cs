@@ -566,9 +566,12 @@ namespace PRMasterServer.Servers
 					DataReceivedCallback = null;
 
 					if (Socket != null) {
-						Socket.Shutdown(SocketShutdown.Both);
-						Socket.Close();
-						Socket.Dispose();
+						try {
+							Socket.Shutdown(SocketShutdown.Both);
+							Socket.Close();
+							Socket.Dispose();
+						} catch (Exception) {
+						}
 						Socket = null;
 					}
 
