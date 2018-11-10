@@ -254,6 +254,10 @@ namespace PRMasterServer.Servers
 
 			var clientData = LoginDatabase.Instance.GetData(name);
 
+            //GP_CHECK_BAD_EMAIL = 3585, // 0xE01, No account exists with the provided e-mail address.
+            //GP_CHECK_BAD_NICK = 3586,	// 0xE02, No such profile exists for the provided e-mail address.
+            //GP_CHECK_BAD_PASSWORD = 3587, // 0xE03, The password is incorrect.
+
 			if (clientData == null) {
 				return DataFunctions.StringToBytes(String.Format(@"\error\\err\265\fatal\\errmsg\Username [{0}] doesn't exist!\id\1\final\", name));
 			}
@@ -292,9 +296,10 @@ namespace PRMasterServer.Servers
             string message = "";
             if (user != null)
             {
-                message += String.Format(@"\bsr\nick\{0}\uniquenick\{0}\namespaceid\2", user["name"]);
+                //message += String.Format(@"\bsr\nick\{0}\uniquenick\{0}\namespaceid\2", user["name"]);
+                message += String.Format(@"\bsr\{0}\nick\{1}\uniquenick\{1}\namespaceid\2", user["profileid"], user["name"]);
             }
-            message += @"\bsrdone\final\";
+            message += @"\bsrdone\final\more\0\";
             Console.WriteLine(message); // TODO remove
             return message;
         }
@@ -306,10 +311,12 @@ namespace PRMasterServer.Servers
             {
                 foreach (Dictionary<string, object> user in users)
                 {
-                    message += String.Format(@"\bsr\email\{0}\namespaceid\2", user["email"]);
+                    //message += String.Format(@"\bsr\email\{0}\namespaceid\2", user["email"]);
+                    message += String.Format(@"\bsr\{0}\nick\{1}\uniquenick\{1}\email\{2}\namespaceid\2", user["profileid"], user["name"], user["email"]);
                 }
             }
-            message += @"\bsrdone\final\";
+            //message += @"\bsrdone\final\";
+            message += @"\bsrdone\final\more\0\";
             Console.WriteLine(message); // TODO remove
             return message;
         }
