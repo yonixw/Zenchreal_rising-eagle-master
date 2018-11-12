@@ -23,7 +23,8 @@ namespace PRMasterServer.Data
 		private delegate bool EventHandler(CtrlType sig);
 		private static EventHandler _closeHandler;
 
-		private SQLiteCommand _getUsersByName;
+        private SQLiteCommand _getUsersById;
+        private SQLiteCommand _getUsersByName;
         private SQLiteCommand _getUsersByEmailReal;
         private SQLiteCommand _getUsersByEmail;
 		private SQLiteCommand _updateUser;
@@ -55,7 +56,7 @@ namespace PRMasterServer.Data
 
 			databasePath = Path.GetFullPath(databasePath);
 
-			if (!File.Exists(databasePath)) {
+            if (!File.Exists(databasePath)) {
 				SQLiteConnection.CreateFile(databasePath);
 			}
 
@@ -107,7 +108,10 @@ namespace PRMasterServer.Data
 
 		private void PrepareStatements()
 		{
-			_getUsersByName = new SQLiteCommand("SELECT id, password, email, country, session FROM users WHERE name=@name COLLATE NOCASE", _db);
+            _getUsersById = new SQLiteCommand("SELECT id, name, password, email, country, session FROM users WHERE id=@id", _db);
+            _getUsersById.Parameters.Add("@id", DbType.Int64);
+
+            _getUsersByName = new SQLiteCommand("SELECT id, password, email, country, session FROM users WHERE name=@name COLLATE NOCASE", _db);
 			_getUsersByName.Parameters.Add("@name", DbType.String);
 
             _getUsersByEmailReal = new SQLiteCommand("SELECT id, name, password, email, country, session FROM users WHERE email=@email COLLATE NOCASE", _db);
@@ -257,7 +261,7 @@ namespace PRMasterServer.Data
 						// only go once
 
 						Dictionary<string, object> data = new Dictionary<string, object>();
-						data.Add("id", reader["id"]);
+						data.Add("id", (Int64)reader["id"]);
 						data.Add("name", username);
 						data.Add("passwordenc", reader["password"]);
 						data.Add("email", reader["email"]);
@@ -273,6 +277,28 @@ namespace PRMasterServer.Data
 
 			return null;
 		}
+
+        public bool CheckPasswordIsCorrect(Int64 id, string password)
+        {
+            if (_db == null)
+                return false;
+
+            // Needs to be updated to PBKDF2 or something
+            string hashedPassword = password.ToMD5();
+
+            lock (_dbLock)
+            {
+                _getUsersById.Parameters["@id"].Value = id;
+                using (SQLiteDataReader reader = _getUsersByName.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return hashedPassword.Equals(reader["password"]);
+                    }
+                }
+            }
+            return false;
+        }
 
         public List<Dictionary<string, object>> GetUserByEmail(string email)
         {

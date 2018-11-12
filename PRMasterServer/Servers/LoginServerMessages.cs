@@ -90,7 +90,7 @@ namespace PRMasterServer.Servers
 
 			string message = String.Format(
 				@"\pi\\profileid\{0}\nick\{1}\userid\{2}\email\{3}\sig\{4}\uniquenick\{5}\pid\{6}" +
-				@"\firstname\lastname\countrycode\{7}\birthday\{8}\lon\{9}\lat\{10}\loc\id\{11}\final\",
+				@"\countrycode\{7}\lon\{9}\lat\{10}\id\{11}\final\",
 				clientData["profileid"],
 				state.Name,
 				clientData["userid"],
@@ -102,8 +102,9 @@ namespace PRMasterServer.Servers
 				16844722,
 				"0.000000",
 				"0.000000",
-				retrieve ? 5 : 2
-			);
+                //retrieve ? 5 : 2
+                keyValues["id"]
+            );
 
 			if (!retrieve)
 				state.State++;
@@ -190,18 +191,26 @@ namespace PRMasterServer.Servers
 			return DataFunctions.StringToBytes(String.Format(@"\lt\{0}\final\", _random.GetString(22, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][") + "__"));
 		}
 
+        internal static string PasswordFromKeyValues(Dictionary<string, string> keyValues)
+        {
+            if (keyValues.ContainsKey("passenc"))
+            {
+                return DecryptPassword(keyValues["passenc"]);
+            }
+            else if (keyValues.ContainsKey("pass"))
+            {
+                return keyValues["pass"];
+            }
+            return String.Empty;
+        }
+
 		internal static byte[] SendNicks(ref LoginSocketState state, Dictionary<string, string> keyValues)
 		{
 			if (!keyValues.ContainsKey("email") || (!keyValues.ContainsKey("passenc") && !keyValues.ContainsKey("pass"))) {
 				return DataFunctions.StringToBytes(@"\error\\err\0\fatal\\errmsg\Invalid Query!\id\1\final\");
 			}
 
-			string password = String.Empty;
-			if (keyValues.ContainsKey("passenc")) {
-				password = DecryptPassword(keyValues["passenc"]);
-			} else if (keyValues.ContainsKey("pass")) {
-				password = keyValues["pass"];
-			}
+            string password = PasswordFromKeyValues(keyValues);
 
 			password = password.ToMD5();
 
@@ -262,7 +271,16 @@ namespace PRMasterServer.Servers
 				return DataFunctions.StringToBytes(String.Format(@"\error\\err\265\fatal\\errmsg\Username [{0}] doesn't exist!\id\1\final\", name));
 			}
 
-			string message = String.Format(@"\cur\0\pid\{0}\final\", clientData["profileid"]);
+            string message;
+            string password = PasswordFromKeyValues(keyValues);
+            if (LoginDatabase.Instance.CheckPasswordIsCorrect((Int64)clientData["id"], password))
+            {
+                message = String.Format(@"\cur\0\pid\{0}\final\", clientData["profileid"]);
+            }
+            else
+            {
+                message = String.Format(@"\cur\3587\pid\{0}\final\", clientData["profileid"]);
+            }
 
 			return DataFunctions.StringToBytes(message);
 		}
@@ -296,11 +314,9 @@ namespace PRMasterServer.Servers
             string message = "";
             if (user != null)
             {
-                //message += String.Format(@"\bsr\nick\{0}\uniquenick\{0}\namespaceid\2", user["name"]);
                 message += String.Format(@"\bsr\{0}\nick\{1}\uniquenick\{1}\namespaceid\2", user["profileid"], user["name"]);
             }
             message += @"\bsrdone\final\more\0\";
-            Console.WriteLine(message); // TODO remove
             return message;
         }
 
@@ -311,13 +327,10 @@ namespace PRMasterServer.Servers
             {
                 foreach (Dictionary<string, object> user in users)
                 {
-                    //message += String.Format(@"\bsr\email\{0}\namespaceid\2", user["email"]);
                     message += String.Format(@"\bsr\{0}\nick\{1}\uniquenick\{1}\email\{2}\namespaceid\2", user["profileid"], user["name"], user["email"]);
                 }
             }
-            //message += @"\bsrdone\final\";
             message += @"\bsrdone\final\more\0\";
-            Console.WriteLine(message); // TODO remove
             return message;
         }
 
