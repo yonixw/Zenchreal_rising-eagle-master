@@ -151,6 +151,13 @@ namespace PRMasterServer.Servers
 				// put each mod name on a new line
 				// to allow all mods, just put a single %
 				if (File.Exists("modwhitelist.txt")) {
+					foreach(var s in Servers)
+                    {
+						Log("[SERVER LIST]",String.Format("{0}: G:{1} OK?{2} IP:{3}:{4} Name:{5}",
+							s.Key, s.Value.gamename + ", " + s.Value.version, s.Value.Valid,
+							s.Value.IPAddress, s.Value.hostport, s.Value.hostname));
+						// Yoni TODO: key is 127.0.0.1:27901, port is 127.0.0.1,S1,29023 ???
+					}
 					Log(Category, "Loading mod whitelist");
 					ModWhitelist = File.ReadAllLines("modwhitelist.txt").Where(x => !String.IsNullOrWhiteSpace(x) && !x.Trim().StartsWith("#")).ToArray();
 				} else {
@@ -329,9 +336,11 @@ namespace PRMasterServer.Servers
 
                 if (property == null)
                 {
-                    LogError(Category, String.Format("Unknown server property '{0}'", serverVarsSplit[i]));
+                    LogError(Category, String.Format("Unknown server property '{0}->{1}'", serverVarsSplit[i], serverVarsSplit[i+1]));
                     continue;
                 }
+
+				Log("[NEW_SERVER]", String.Format("[{2}] {0}:{1}", serverVarsSplit[i], serverVarsSplit[i + 1], property.PropertyType));
 
                 if (property.Name == "hostname") {
 					// strip consecutive whitespace from hostname

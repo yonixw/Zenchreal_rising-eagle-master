@@ -13,6 +13,15 @@ namespace PRMasterServer
 
 		static void Main(string[] args)
 		{
+			Console.WriteLine("YoniXw (c) 2025");
+			Console.WriteLine("Rising Eagle: Futuristic Infantry Warfare, v1.3.1");
+			Console.WriteLine("------------------------");
+			Console.WriteLine("Thanks to https://github.com/Zenchreal/rising-eagle-master");
+			Console.WriteLine("------------------------");
+			Console.WriteLine("");
+			
+			Thread.Sleep(6*1000);
+
 			Action<string, string> log = (category, message) => {
 				lock (_lock) {
 					Log(String.Format("[{0}] {1}", category, message));

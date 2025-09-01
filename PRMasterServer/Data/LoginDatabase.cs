@@ -62,13 +62,14 @@ namespace PRMasterServer.Data
 
 			if (File.Exists(databasePath)) {
 				SQLiteConnectionStringBuilder connBuilder = new SQLiteConnectionStringBuilder() {
-					DataSource = databasePath,
-					Version = 3,
-					PageSize = 4096,
-					CacheSize = 10000,
-					JournalMode = SQLiteJournalModeEnum.Wal,
-					LegacyFormat = false,
-					DefaultTimeout = 500
+					DataSource = databasePath
+
+					//Version = 3,
+					//PageSize = 4096,
+					//CacheSize = 10000,
+					//JournalMode = SQLiteJournalModeEnum.Wal,
+					//LegacyFormat = false,
+					//DefaultTimeout = 500
 				};
 				
 				_instance._db = new SQLiteConnection(connBuilder.ToString());

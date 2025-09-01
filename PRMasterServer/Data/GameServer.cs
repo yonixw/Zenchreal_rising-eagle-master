@@ -35,8 +35,9 @@ namespace PRMasterServer.Data
 
         [NonFilter]
         public string localip3 { get; set; }
+		public string localip4 { get; set; } // For every eth the user have.. so infinite? and it won't crash.. so we good on ip5+
 
-        [NonFilter]
+		[NonFilter]
 		public int localport { get; set; }
 
         [NonFilter]

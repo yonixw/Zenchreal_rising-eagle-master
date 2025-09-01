@@ -322,6 +322,7 @@ namespace PRMasterServer.Servers
 					!data[1].Equals("gslive", StringComparison.InvariantCultureIgnoreCase)
 				)
 			) {
+				Log(Category, String.Format("[!SERVER!] Received UNKOWN client request: {0}:{1}", ((IPEndPoint)state.Socket.RemoteEndPoint).Address, ((IPEndPoint)state.Socket.RemoteEndPoint).Port));
 				return false;
 			}
 
@@ -330,7 +331,7 @@ namespace PRMasterServer.Servers
 			string filter = FixFilter(data[2].Substring(8));
 			string[] fields = data[3].Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
 
-			Log(Category, String.Format("Received client request: {0}:{1}", ((IPEndPoint)state.Socket.RemoteEndPoint).Address, ((IPEndPoint)state.Socket.RemoteEndPoint).Port));
+			Log(Category, String.Format("[!SERVER!] Received client request: {0}:{1}", ((IPEndPoint)state.Socket.RemoteEndPoint).Address, ((IPEndPoint)state.Socket.RemoteEndPoint).Port));
 
 			IQueryable<GameServer> servers = _report.Servers.ToList().Select(x => x.Value).Where(x => x.Valid).AsQueryable();
 			if (!String.IsNullOrWhiteSpace(filter)) {
