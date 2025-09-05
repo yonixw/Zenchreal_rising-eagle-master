@@ -1,3 +1,7 @@
+# Links
+* https://github.com/Zenchreal/rising-eagle-master
+* https://github.com/yonixw/REExtraUtils
+
 rising-eagle-master
 ==============
 
