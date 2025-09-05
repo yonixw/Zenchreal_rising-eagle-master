@@ -13,7 +13,7 @@ namespace PRMasterServer
 
 		static void Main(string[] args)
 		{
-			Console.WriteLine("YoniXw (c) 2025");
+			Console.WriteLine("RePackaged for Win10/11 by YoniXw @ 09/2025");
 			Console.WriteLine("Rising Eagle: Futuristic Infantry Warfare, v1.3.1");
 			Console.WriteLine("------------------------");
 			Console.WriteLine("Thanks to https://github.com/Zenchreal/rising-eagle-master");

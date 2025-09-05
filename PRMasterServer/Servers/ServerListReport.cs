@@ -336,11 +336,12 @@ namespace PRMasterServer.Servers
 
                 if (property == null)
                 {
-                    LogError(Category, String.Format("Unknown server property '{0}->{1}'", serverVarsSplit[i], serverVarsSplit[i+1]));
+                    LogError(Category, String.Format("Unknown server property '{0}': '{1}'", serverVarsSplit[i], serverVarsSplit[i+1]));
                     continue;
                 }
 
-				Log("[NEW_SERVER]", String.Format("[{2}] {0}:{1}", serverVarsSplit[i], serverVarsSplit[i + 1], property.PropertyType));
+				//Too verbose:
+				//Log("[NEW_SERVER]", String.Format("[{2}] {0}:{1}", serverVarsSplit[i], serverVarsSplit[i + 1], property.PropertyType));
 
                 if (property.Name == "hostname") {
 					// strip consecutive whitespace from hostname
