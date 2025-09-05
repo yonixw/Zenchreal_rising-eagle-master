@@ -62,6 +62,8 @@ namespace PRMasterServer
 			ServerListReport serverListReport = new ServerListReport(bind, 27900, log, logError);
 			ServerListRetrieve serverListRetrieve = new ServerListRetrieve(bind, 28910, serverListReport, log, logError);
 			LoginServer loginServer = new LoginServer(bind, 29900, 29901, log, logError);
+			
+//			MockServerService.Main().GetAwaiter().GetResult();
 
 			while (true) {
 				Thread.Sleep(1000);
