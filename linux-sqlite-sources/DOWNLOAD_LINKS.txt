@@ -1,0 +1,6 @@
+Until 116:
+https://system.data.sqlite.org/home/doc/preRelease/www/downloads.wiki
+
+https://www2.sqlite.org/forum/forumpost/c4830dd0bbea8746
+https://system.data.sqlite.org/blobs/1.0.119.0/sqlite-netStandard20-binary-1.0.119.0.zip
+https://system.data.sqlite.org/blobs/1.0.119.0/sqlite-netFx-source-1.0.119.0.zip

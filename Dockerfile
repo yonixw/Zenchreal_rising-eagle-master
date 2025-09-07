@@ -22,6 +22,11 @@ RUN cd /usr/src/sqlite-interop/Setup/ \
     && chmod +x compile-interop-assembly-debug.sh \
     && ./compile-interop-assembly-debug.sh \
     && cp ../bin/2013/Debug/bin/libSQLite.Interop.so /usr/lib/ 
+    
+# Replace the one from the nuget package... Not sure why, same version! 
+#   But a must! o.w. System.EntryPointNotFoundException
+COPY linux-sqlite-sources/sqlite-netStandard20-binary-1.0.119.0.zip /usr/src/
+RUN unzip /usr/src/sqlite-netStandard20-binary-1.0.119.0.zip -d /usr/lib/dlls/ 
 
 FROM mono:latest
 
@@ -43,4 +48,5 @@ USER master_server
 COPY bin/Debug .
 
 COPY --from=builder /usr/lib/libSQLite.Interop.so .
+COPY --from=builder /usr/lib/dlls/ .
 
