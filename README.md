@@ -1,5 +1,5 @@
-# Rising Eagle PC (2008) Extra Utils
-Download: [Release Page](/releases)
+# Rising Eagle PC (2008) - GameSpy Fake/Mock MasterServer
+Download: [Release Page](https://github.com/yonixw/Zenchreal_rising-eagle-master/releases)
 
 # Links:
 * See in release page (links.txt).
